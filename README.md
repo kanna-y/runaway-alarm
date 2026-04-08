@@ -494,7 +494,7 @@
     <div class="topbar">
       <div>
         <div class="title">Runaway Alarm 2</div>
-        <div class="subtitle">前より意地悪。だけどまだ人類に勝ち目はあります。</div>
+        <div class="subtitle">前より意地悪。勢い突破もしにくくしました。</div>
       </div>
       <button class="icon-btn" id="previewBtn" title="テスト再生">⏰</button>
     </div>
@@ -596,7 +596,7 @@
   <div class="toast" id="toast"></div>
 
   <script>
-    const STORAGE_KEY = 'runaway-alarm-app-v3';
+    const STORAGE_KEY = 'runaway-alarm-app-v4';
     const WEEKDAY_LABELS = ['日', '月', '火', '水', '木', '金', '土'];
     const SOUND_OPTIONS = [
       { id: 'bright', label: 'Bright Bell' },
@@ -626,7 +626,11 @@
       barHeight: 72,
       rotation: 0,
       targetRotation: 0,
-      lastEscapeAt: 0
+      lastEscapeAt: 0,
+      holdStartAt: 0,
+      holdActive: false,
+      lastPointerX: 0,
+      lastMoveAt: 0
     };
 
     const el = {
@@ -701,7 +705,7 @@
     function noteByDifficulty(level) {
       if (level === 'easy') return 'バー本体はゆっくり動きます。つまみも少しだけ逃げます。';
       if (level === 'normal') return 'バー本体がくるくる逃げます。終盤ほどつまみがしぶとく戻ります。';
-      return 'Runaway Alarm 2 仕様です。かなり意地悪ですが、集中すればまだ勝てます。';
+      return 'Runaway Alarm 2 仕様です。かなり意地悪です。勢い突破もしにくくしてあります。';
     }
 
     function initWeekdays() {
@@ -965,47 +969,58 @@
     function difficultyConfig(level) {
       if (level === 'easy') {
         return {
-          orbitSpeed: 0.010,
-          radiusX: 78,
-          radiusY: 118,
-          escapeChance: 0.13,
-          knockBackMin: 14,
-          knockBackMax: 24,
-          microChance: 0.08,
-          microBack: 10,
-          pull: 0.86,
-          releasePenalty: 5,
-          rotateJolt: 28
+          orbitSpeed: 0.012,
+          radiusX: 86,
+          radiusY: 128,
+          escapeChance: 0.18,
+          knockBackMin: 18,
+          knockBackMax: 30,
+          microChance: 0.12,
+          microBack: 12,
+          pull: 0.8,
+          releasePenalty: 7,
+          rotateJolt: 34,
+          holdMs: 550,
+          antiFlickPx: 45
         };
       }
       if (level === 'normal') {
         return {
-          orbitSpeed: 0.016,
-          radiusX: 110,
-          radiusY: 160,
-          escapeChance: 0.22,
-          knockBackMin: 22,
-          knockBackMax: 38,
-          microChance: 0.16,
-          microBack: 14,
-          pull: 0.74,
-          releasePenalty: 8,
-          rotateJolt: 46
+          orbitSpeed: 0.019,
+          radiusX: 124,
+          radiusY: 174,
+          escapeChance: 0.29,
+          knockBackMin: 28,
+          knockBackMax: 46,
+          microChance: 0.22,
+          microBack: 18,
+          pull: 0.68,
+          releasePenalty: 10,
+          rotateJolt: 56,
+          holdMs: 800,
+          antiFlickPx: 36
         };
       }
       return {
-        orbitSpeed: 0.021,
-        radiusX: 138,
-        radiusY: 188,
-        escapeChance: 0.30,
-        knockBackMin: 28,
-        knockBackMax: 48,
-        microChance: 0.23,
-        microBack: 18,
-        pull: 0.64,
-        releasePenalty: 12,
-        rotateJolt: 64
+        orbitSpeed: 0.025,
+        radiusX: 148,
+        radiusY: 200,
+        escapeChance: 0.38,
+        knockBackMin: 34,
+        knockBackMax: 58,
+        microChance: 0.30,
+        microBack: 22,
+        pull: 0.6,
+        releasePenalty: 14,
+        rotateJolt: 76,
+        holdMs: 1100,
+        antiFlickPx: 28
       };
+    }
+
+    function resetHoldState() {
+      appState.holdStartAt = 0;
+      appState.holdActive = false;
     }
 
     function resetRunawayGame() {
@@ -1014,6 +1029,9 @@
       appState.orbitAngle = 0;
       appState.rotation = 0;
       appState.targetRotation = 0;
+      appState.lastPointerX = 0;
+      appState.lastMoveAt = 0;
+      resetHoldState();
       applyDifficultyMotion(appState.currentAlarm?.difficulty || 'normal');
       updateThumb();
       updateProgress();
@@ -1101,9 +1119,10 @@
     }
 
     function completeAlarm() {
+      resetHoldState();
       appState.progress = 100;
       updateProgress();
-      showToast('Runaway Alarm 2 制覇です。えらいです。');
+      showToast('Runaway Alarm 2 制覇です。かなりえらいです。');
       const current = appState.currentAlarm;
       stopCurrentAlarm();
       if (current && current._temporary) {
@@ -1239,7 +1258,7 @@
       el.difficultyBadge.textContent = difficultyLabel(fake.difficulty);
       el.ringTime.textContent = fake.time;
       el.ringName.textContent = fake.name;
-      el.ringNote.textContent = 'Runaway Alarm 2 のテストです。前よりしぶといです。';
+      el.ringNote.textContent = 'Runaway Alarm 2 のテストです。前よりさらにしぶといです。';
       resetRunawayGame();
       startAlarmSound(fake.sound);
     }
@@ -1262,7 +1281,7 @@
       [...el.typeSegment.querySelectorAll('button')].forEach(btn => btn.addEventListener('click', () => setSelectedType(btn.dataset.type)));
       [...el.difficultyRow.querySelectorAll('button')].forEach(btn => btn.addEventListener('click', () => setSelectedDifficulty(btn.dataset.level)));
       el.snoozeBtn.addEventListener('click', snoozeCurrentAlarm);
-      el.giveUpBtn.addEventListener('click', () => showToast('まだです。Runaway Alarm 2 は甘くありません。'));
+      el.giveUpBtn.addEventListener('click', () => showToast('まだです。Runaway Alarm 2 はさらに甘くありません。'));
 
       el.runawayThumb.addEventListener('pointerdown', (e) => {
         if (!appState.currentAlarm) return;
@@ -1271,28 +1290,58 @@
           startX: e.clientX,
           thumbStart: appState.thumbLeft
         };
+        appState.lastPointerX = e.clientX;
+        appState.lastMoveAt = performance.now();
         el.runawayThumb.setPointerCapture(e.pointerId);
       });
 
       el.runawayThumb.addEventListener('pointermove', (e) => {
         if (!appState.drag || !appState.currentAlarm) return;
         const cfg = difficultyConfig(appState.currentAlarm.difficulty);
+        const now = performance.now();
+        const dt = Math.max(1, now - (appState.lastMoveAt || now));
+        const flickDistance = Math.abs(e.clientX - (appState.lastPointerX || e.clientX));
+        appState.lastPointerX = e.clientX;
+        appState.lastMoveAt = now;
+
         const dx = e.clientX - appState.drag.startX;
         let next = appState.drag.thumbStart + dx * cfg.pull;
         const threat = clamp((next - 8) / (getThumbMaxLeft() - 8 || 1), 0, 1);
 
+        if (flickDistance > cfg.antiFlickPx && dt < 26) {
+          next -= cfg.knockBackMax * (0.8 + threat * 0.7);
+          appState.targetRotation += cfg.rotateJolt * 0.7;
+          resetHoldState();
+        }
+
         if (Math.random() < (cfg.escapeChance + threat * 0.34)) {
           next -= cfg.knockBackMin + Math.random() * (cfg.knockBackMax - cfg.knockBackMin);
+          resetHoldState();
         }
         if (Math.random() < (cfg.microChance + threat * 0.18)) {
           next -= cfg.microBack;
+          resetHoldState();
         }
+
         maybeEscape(threat);
+
         appState.thumbLeft = clamp(next, 8, getThumbMaxLeft());
         appState.progress = Math.max(appState.progress, ((appState.thumbLeft - 8) / (getThumbMaxLeft() - 8 || 1)) * 100);
         updateThumb();
         updateProgress();
-        if (appState.thumbLeft >= getThumbMaxLeft() - 2) completeAlarm();
+
+        if (appState.thumbLeft >= getThumbMaxLeft() - 2) {
+          if (!appState.holdActive) {
+            appState.holdActive = true;
+            appState.holdStartAt = now;
+            showToast('右端キープ中…！');
+          }
+          if (now - appState.holdStartAt >= cfg.holdMs) {
+            completeAlarm();
+          }
+        } else {
+          resetHoldState();
+        }
       });
 
       function endDrag(e) {
@@ -1301,10 +1350,11 @@
         const cfg = difficultyConfig(appState.currentAlarm?.difficulty || 'normal');
         appState.drag = null;
         appState.thumbLeft = clamp(appState.thumbLeft - cfg.releasePenalty, 8, getThumbMaxLeft());
-        appState.progress = clamp(appState.progress - Math.max(3, cfg.releasePenalty * 0.35), 0, 100);
+        appState.progress = clamp(appState.progress - Math.max(4, cfg.releasePenalty * 0.4), 0, 100);
         updateThumb();
         updateProgress();
-        maybeEscape(0.7);
+        resetHoldState();
+        maybeEscape(0.75);
       }
 
       el.runawayThumb.addEventListener('pointerup', endDrag);
