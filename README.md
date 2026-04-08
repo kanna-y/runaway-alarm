@@ -493,7 +493,7 @@
   <div class="app">
     <div class="topbar">
       <div>
-        <div class="title">Runaway Alarm 2</div>
+        <div class="title">Runaway Alarm 3</div>
         <div class="subtitle">前より意地悪。勢い突破もしにくくしました。</div>
       </div>
       <button class="icon-btn" id="previewBtn" title="テスト再生">⏰</button>
@@ -705,7 +705,7 @@
     function noteByDifficulty(level) {
       if (level === 'easy') return 'バー本体はゆっくり動きます。つまみも少しだけ逃げます。';
       if (level === 'normal') return 'バー本体がくるくる逃げます。終盤ほどつまみがしぶとく戻ります。';
-      return 'Runaway Alarm 2 仕様です。かなり意地悪です。勢い突破もしにくくしてあります。';
+      return 'Runaway Alarm 3 仕様です。かなり意地悪です。勢い突破もしにくくしてあります。';
     }
 
     function initWeekdays() {
@@ -1122,7 +1122,7 @@
       resetHoldState();
       appState.progress = 100;
       updateProgress();
-      showToast('Runaway Alarm 2 制覇です。かなりえらいです。');
+      showToast('Runaway Alarm 3 制覇です。かなりえらいです。');
       const current = appState.currentAlarm;
       stopCurrentAlarm();
       if (current && current._temporary) {
@@ -1258,7 +1258,7 @@
       el.difficultyBadge.textContent = difficultyLabel(fake.difficulty);
       el.ringTime.textContent = fake.time;
       el.ringName.textContent = fake.name;
-      el.ringNote.textContent = 'Runaway Alarm 2 のテストです。前よりさらにしぶといです。';
+      el.ringNote.textContent = 'Runaway Alarm 3 のテストです。前よりさらにしぶといです。';
       resetRunawayGame();
       startAlarmSound(fake.sound);
     }
@@ -1281,7 +1281,7 @@
       [...el.typeSegment.querySelectorAll('button')].forEach(btn => btn.addEventListener('click', () => setSelectedType(btn.dataset.type)));
       [...el.difficultyRow.querySelectorAll('button')].forEach(btn => btn.addEventListener('click', () => setSelectedDifficulty(btn.dataset.level)));
       el.snoozeBtn.addEventListener('click', snoozeCurrentAlarm);
-      el.giveUpBtn.addEventListener('click', () => showToast('まだです。Runaway Alarm 2 はさらに甘くありません。'));
+      el.giveUpBtn.addEventListener('click', () => showToast('まだです。Runaway Alarm 3 はさらに甘くありません。'));
 
       el.runawayThumb.addEventListener('pointerdown', (e) => {
         if (!appState.currentAlarm) return;
