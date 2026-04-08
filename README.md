@@ -418,16 +418,19 @@
     }
 
     .track {
-      position: absolute;
-      left: 16px;
-      right: 16px;
-      bottom: 22px;
-      height: 68px;
-      border-radius: 999px;
-      background: rgba(255,255,255,.06);
-      border: 1px solid rgba(255,255,255,.08);
-      overflow: hidden;
-    }
+  position: fixed;
+  width: min(320px, calc(100vw - 32px));
+  height: 68px;
+  border-radius: 999px;
+  background: rgba(255,255,255,.06);
+  border: 1px solid rgba(255,255,255,.08);
+  overflow: hidden;
+  left: 16px;
+  top: 220px;
+  transition: left .16s ease, top .16s ease;
+  z-index: 160;
+  touch-action: none;
+}
 
     .track-fill {
       position: absolute;
